@@ -3,14 +3,17 @@ package com.taskmanagement.entities;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "tb_prioridade")
 public enum Prioridade {
-	Baixa(1), MediaA(2), Alta(3);
+	Baixa(0), MediaA(1), Alta(2);
 
-	Prioridade(int prioridade) {
-		// TODO Auto-generated constructor stub
-	}
-	
+	private final int valor;
+
+    Prioridade(int valor) {
+        this.valor = valor;
+    }
+
+    public int getValor() {
+        return valor;
+    }
 	
 }

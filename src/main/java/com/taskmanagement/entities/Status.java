@@ -3,12 +3,17 @@ package com.taskmanagement.entities;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "tb_status")
-public enum Status {
-	Pendente(1), EmAndamento(2), Concluido(3);
 
-	Status(int status) {
-		// TODO Auto-generated constructor stub
-	}
+public enum Status {
+	Pendente(0), EmAndamento(1), Concluido(2);
+
+	private final int valor;
+
+    Status(int valor) {
+        this.valor = valor;
+    }
+
+    public int getValor() {
+        return valor;
+    }
 }

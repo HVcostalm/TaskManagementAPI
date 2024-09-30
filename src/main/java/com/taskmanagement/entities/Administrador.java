@@ -1,12 +1,15 @@
 package com.taskmanagement.entities;
 
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tb_administrador")
+@DiscriminatorValue("Administrador")
 public class Administrador extends FuncionarioSenior{
-	private Long idAdministrador;
 	
 	public void cadastrarFuncionario() {
 		
@@ -22,14 +25,6 @@ public class Administrador extends FuncionarioSenior{
 	
 	public void listarProjetos() {
 		
-	}
-	
-	public Long getIdAdministrador() {
-		return idAdministrador;
-	}
-
-	public void setIdAdministrador(Long idAdministrador) {
-		this.idAdministrador = idAdministrador;
 	}
 	
 }
