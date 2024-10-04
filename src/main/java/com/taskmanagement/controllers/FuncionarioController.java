@@ -1,7 +1,7 @@
 package com.taskmanagement.controllers;
 
 import java.util.List;
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,11 +42,11 @@ public class FuncionarioController {
 	@Autowired
 	private FuncionarioService funcionarioService;
 	
-	private Date data = new Date();
-	private Funcionario funcionario;
-	private Projeto projeto;
-	private Tarefa tarefa;
-	private FuncionarioProjeto funcionario_projeto;
+	private LocalDate data;
+	private Funcionario funcionario = new Funcionario();
+	private Projeto projeto = new Projeto();
+	private Tarefa tarefa = new Tarefa();
+	private FuncionarioProjeto funcionario_projeto = new FuncionarioProjeto();
 	
 	// GET
 		
@@ -104,7 +104,13 @@ public class FuncionarioController {
 	
 	@GetMapping(value="/projetos/{id_funcionario}")
 	public List<Projeto> listarProjetos(@PathVariable Long id_funcionario) { // Somente administrador
-		return projetoRepository.findAll();
+		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
+			return projetoRepository.findAll();
+		}
+		else {
+			System.out.println("Somente o administrador pode realizar essa ação");
+			return null;
+		}
 	}
 	
 	// POST
@@ -132,7 +138,7 @@ public class FuncionarioController {
 			if (funcionarioService.criarProjeto(id_funcionario_senior)) {
 				System.out.println("Projeto criado com sucesso");
 				projetoRepository.save(projeto);
-				this.funcionario = funcionarioService.pegarFuncionario(id_funcionario);
+				this.funcionario = funcionarioService.pegarFuncionario(id_funcionario_senior);
 				this.funcionario.setProjeto(projeto);
 				funcionarioRepository.save(this.funcionario);
 				this.funcionario_projeto.setFuncionario(this.funcionario);

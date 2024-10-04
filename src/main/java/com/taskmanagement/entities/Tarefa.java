@@ -38,6 +38,13 @@ public class Tarefa {
 		this.status = status;
 		this.projeto = projeto;
 	}
+	
+	
+	
+	public Tarefa() {
+	}
+
+
 
 	public Long getId_tarefa() {
 		return id_tarefa;

@@ -1,6 +1,7 @@
 package com.taskmanagement.entities;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,8 +16,10 @@ import jakarta.persistence.Table;
 public class FuncionarioProjeto {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Date data_participacao_inicial;
-	private Date data_participacao_final;
+	private Long id_funcionario_projeto;
+	
+	private LocalDate  data_participacao_inicial;
+	private LocalDate  data_participacao_final;
 	
 	@OneToOne
 	@JoinColumn(name="projeto_id")
@@ -26,25 +29,40 @@ public class FuncionarioProjeto {
 	@JoinColumn(name="funcionario_id")
 	private Funcionario funcionario;
 	
-	public FuncionarioProjeto(Date data_participacao_inicial, Projeto projeto, Funcionario funcionario) {
+	public FuncionarioProjeto(LocalDate  data_participacao_inicial, Projeto projeto, Funcionario funcionario) {
 		this.data_participacao_inicial = data_participacao_inicial;
 		this.projeto = projeto;
 		this.funcionario = funcionario;
 	}
+	
+	
 
-	public Date getData_participacao_inicial() {
+	public FuncionarioProjeto() {
+	}
+
+
+
+	public Long getId_funcionario_projeto() {
+		return id_funcionario_projeto;
+	}
+
+	public void setId_funcionario_projeto(Long id_funcionario_projeto) {
+		this.id_funcionario_projeto = id_funcionario_projeto;
+	}
+
+	public LocalDate getData_participacao_inicial() {
 		return data_participacao_inicial;
 	}
 
-	public void setData_participacao_inicial(Date data_participacao_inicial) {
+	public void setData_participacao_inicial(LocalDate data_participacao_inicial) {
 		this.data_participacao_inicial = data_participacao_inicial;
 	}
 
-	public Date getData_participacao_final() {
+	public LocalDate getData_participacao_final() {
 		return data_participacao_final;
 	}
 
-	public void setData_participacao_final(Date data_participacao_final) {
+	public void setData_participacao_final(LocalDate data_participacao_final) {
 		this.data_participacao_final = data_participacao_final;
 	}
 
@@ -63,6 +81,7 @@ public class FuncionarioProjeto {
 	public void setFuncionario(Funcionario funcionario) {
 		this.funcionario = funcionario;
 	}
+
 	
 	
 }
