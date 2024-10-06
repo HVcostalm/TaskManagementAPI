@@ -7,3 +7,5 @@ INSERT INTO tb_projeto(nome_projeto, descricao_projeto, data_prevista_entrega, d
 UPDATE tb_funcionario set projeto_id = 1 where id_funcionario = 2;
 
 INSERT INTO tb_funcionario_projeto(data_participacao_inicial, data_participacao_final, projeto_id, funcionario_id) values('04-10-24', null, 1, 2);
+
+INSERT INTO tb_tarefa(nome_tarefa, descricao_tarefa, prioridade, status, projeto_id) values ('Banco de Dados', 'Construir um modelo de entidade-relacionamento no banco de dados', 2, 0, 1);

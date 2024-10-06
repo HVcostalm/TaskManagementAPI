@@ -1,5 +1,6 @@
 package com.taskmanagement.services;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +42,9 @@ public class FuncionarioService {
 	private NivelPermissao nivel_permissao;
 	private Status status;
 	private Prioridade prioridade;
+	private LocalDate data;
 	
-	public Funcionario pegarFuncionario(Long id_funcionario) {
+	public Funcionario encontrarFuncionario(Long id_funcionario) {
 		List<Funcionario> funcionarios = new ArrayList<>();
 		funcionarios = funcionario_repository.findAll();
 		
@@ -86,10 +88,10 @@ public class FuncionarioService {
 	public boolean encontrarAdministrador(Long id_funcionario) {
 		List<Funcionario> funcionarios = new ArrayList<>();
 		funcionarios = funcionario_repository.findAll();
-		boolean cadastrarFuncionarioSucesso = true, existeAdministrador = false;
+		boolean realizarAcao = true, existeAdministrador = false;
 		
 		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Administrador) {
+			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Administrador && funcionario.isStatus()==true) {
 				this.funcionario = funcionario;
 				existeAdministrador = true;
 				break;
@@ -97,12 +99,268 @@ public class FuncionarioService {
 		}
 		
 		if(existeAdministrador) {
-			return cadastrarFuncionarioSucesso;
+			return realizarAcao;
 		}
 		else {
 			System.out.println("Administrador inexistente");
-			return cadastrarFuncionarioSucesso = false;
+			return realizarAcao = false;
 		}
+	}
+	
+	public List<Funcionario> listarAdministradores(){
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		List<Funcionario> funcionariosAdministradores = new ArrayList<>();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getNivel_permissao()==nivel_permissao.Administrador) {
+				funcionariosAdministradores.add(funcionario);
+			}
+		}
+		
+		return funcionariosAdministradores;
+	}
+	
+	public boolean encontrarSenior(Long id_funcionario) {
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		boolean realizarAcao = true, existeSenior = false;
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Senior && funcionario.isStatus()==true) {
+				this.funcionario = funcionario;
+				existeSenior = true;
+				break;
+			}
+		}
+		
+		if(existeSenior) {
+			return realizarAcao;
+		}
+		else {
+			System.out.println("Senior inexistente");
+			return realizarAcao = false;
+		}
+	}
+	
+	public List<Funcionario> listarSeniores(){
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		List<Funcionario> funcionariosSeniores = new ArrayList<>();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getNivel_permissao()==nivel_permissao.Senior) {
+				funcionariosSeniores.add(funcionario);
+			}
+		}
+		
+		return funcionariosSeniores;
+	}
+	
+	public boolean encontrarJunior(Long id_funcionario) {
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		boolean realizarAcao = true, existeJunior = false;
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Junior && funcionario.isStatus()==true) {
+				this.funcionario = funcionario;
+				existeJunior = true;
+				break;
+			}
+		}
+		
+		if(existeJunior) {
+			return realizarAcao;
+		}
+		else {
+			System.out.println("Junior inexistente");
+			return realizarAcao = false;
+		}
+	}
+	
+	public List<Funcionario> listarJuniores(){
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		List<Funcionario> funcionariosJuniores = new ArrayList<>();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getNivel_permissao()==nivel_permissao.Senior) {
+				funcionariosJuniores.add(funcionario);
+			}
+		}
+		
+		return funcionariosJuniores;
+	}
+	
+	public boolean verificarExisteProjeto(Long id_projeto) {
+		List<Projeto> projetos = new ArrayList<>();
+		projetos = projeto_repository.findAll();
+		
+		for(Projeto projeto: projetos) {
+			if(projeto.getId_projeto()==id_projeto) {
+				return true;
+			}
+		}
+			return false;
+	}
+	
+	public boolean verificarSeniorProjeto(Long id_funcionario, Long id_projeto) {
+		this.funcionario = funcionario_repository.findById(id_funcionario).get();
+		this.projeto = projeto_repository.findById(id_projeto).get();
+		
+		if(this.funcionario.getProjeto()==this.projeto)
+			return true;
+		else
+			return false;
+	}
+	
+	public boolean verificarQuantidadeFuncionariosProjeto(Long id_projeto) {
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		List<Funcionario> funcionariosProjeto = new ArrayList<>();
+		this.projeto = projeto_repository.findById(id_projeto).get();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getProjeto()==this.projeto)
+				funcionariosProjeto.add(funcionario);
+		}
+		
+		if(funcionariosProjeto.size()<7)
+			return true;
+		
+		return false;
+	}
+	
+	public boolean encontrarTarefa(Long id_tarefa) {
+		List<Tarefa> tarefas = new ArrayList<>();
+		tarefas = tarefa_repository.findAll();
+		boolean tarefaEncontrada = false;
+		
+		for(Tarefa tarefa: tarefas) {
+			if(tarefa.getId_tarefa()==id_tarefa) {
+				tarefaEncontrada = true;
+				break;
+			}
+		}
+		
+		if(tarefaEncontrada)
+			return true;
+		else
+			return false;
+	}
+	
+	public boolean encontrarFuncionarioParaAtualizarInformacao(Long id_funcionario) {
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if( (funcionario.getId_funcionario() == id_funcionario) && (funcionario.isStatus()==true) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean verificarSomenteSenhaEmailAlterados(Funcionario funcionario, Long id_funcionario) {
+		this.funcionario = funcionario_repository.findById(id_funcionario).get();
+		
+		if( (this.funcionario.getProjeto()==funcionario.getProjeto()) && (this.funcionario.getNivel_permissao()==funcionario.getNivel_permissao()) && (this.funcionario.getLogin_funcionario().equalsIgnoreCase(funcionario.getLogin_funcionario())) && (this.funcionario.getId_funcionario()==funcionario.getId_funcionario())  ) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean verificarTodasTarefasConcluidas(Projeto projeto) {
+		List<Tarefa> tarefas = new ArrayList<>();
+		tarefas = tarefa_repository.findAll();
+		List<Tarefa> tarefasProjeto = new ArrayList<>();
+		int contadorTarefasConcluidas = 0;
+		
+		for(Tarefa tarefa: tarefas) {
+			if(tarefa.getProjeto()==projeto) {
+				tarefasProjeto.add(tarefa);
+			}
+		}
+		
+		for(Tarefa tarefa: tarefasProjeto) {
+			if(tarefa.getStatus()==status.Concluido) {
+				contadorTarefasConcluidas++;
+			}
+		}
+		
+		if(tarefasProjeto.size()==contadorTarefasConcluidas) {
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	public void finalizarProjetoFuncionarios(Projeto projeto) {
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		List<FuncionarioProjeto> funcionariosProjetos = new ArrayList<>();
+		funcionariosProjetos = funcionario_projeto_repository.findAll();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getProjeto()==projeto) {
+				funcionario.setProjeto(null);
+				funcionario_repository.save(funcionario);
+			}
+		}
+		
+		for(FuncionarioProjeto funcionarioProjeto: funcionariosProjetos) {
+			if(funcionarioProjeto.getProjeto()==projeto) {
+				funcionarioProjeto.setData_participacao_final(data);
+				funcionario_projeto_repository.save(funcionarioProjeto);
+			}
+		}
+		
+	}
+	
+	public boolean verificarSomentePrioridadeAlterada(Tarefa tarefa, Long id_tarefa) {
+		this.tarefa = tarefa_repository.findById(id_tarefa).get();
+		
+		if((this.tarefa.getDescricao_tarefa().equalsIgnoreCase(tarefa.getDescricao_tarefa())) && (this.tarefa.getId_tarefa()==tarefa.getId_tarefa()) && (this.tarefa.getNome_tarefa().equalsIgnoreCase(tarefa.getNome_tarefa())) && (this.tarefa.getProjeto()==tarefa.getProjeto()) && (this.tarefa.getStatus()==tarefa.getStatus())  ) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public List<Tarefa> listarTarefasProjeto(Projeto projeto){
+		List<Tarefa> tarefas = new ArrayList<>();
+		tarefas = tarefa_repository.findAll();
+		List<Tarefa> tarefasProjeto = new ArrayList<>();
+		
+		for(Tarefa tarefa: tarefas) {
+			if(tarefa.getProjeto()==projeto) {
+				tarefasProjeto.add(tarefa);
+			}
+		}
+		
+		if(tarefasProjeto.isEmpty()) {
+			System.out.println("Nenhuma tarefa foi criada");
+		}
+		
+		return tarefasProjeto;
+	}
+	
+	
+	public Projeto exibirProjetoFuncionario(Long id_funcionario) {
+		this.funcionario = funcionario_repository.findById(id_funcionario).get();
+		List<Projeto> projetos = new ArrayList<>();
+		projetos = projeto_repository.findAll();
+		
+		for(Projeto projeto: projetos) {
+			if(this.funcionario.getProjeto()==projeto) {
+				this.projeto = projeto;
+				break;
+			}
+		}
+		System.out.println("Este funcionario não tem um projeto atribuido");
+		return null;
 	}
 	
 }
