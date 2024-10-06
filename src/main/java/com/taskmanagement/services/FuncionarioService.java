@@ -6,12 +6,10 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.taskmanagement.entities.Funcionario;
 import com.taskmanagement.entities.FuncionarioProjeto;
 import com.taskmanagement.entities.NivelPermissao;
-import com.taskmanagement.entities.Prioridade;
 import com.taskmanagement.entities.Projeto;
 import com.taskmanagement.entities.Status;
 import com.taskmanagement.entities.Tarefa;
@@ -38,22 +36,12 @@ public class FuncionarioService {
 	private Funcionario funcionario;
 	private Projeto projeto;
 	private Tarefa tarefa;
-	private FuncionarioProjeto funcionario_projeto;
 	private NivelPermissao nivel_permissao;
 	private Status status;
-	private Prioridade prioridade;
 	private LocalDate data;
 	
 	public Funcionario encontrarFuncionario(Long id_funcionario) {
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getId_funcionario() == id_funcionario) {
-				this.funcionario = funcionario;
-				break;
-			}
-		}
+		this.funcionario = funcionario_repository.findById(id_funcionario).get();
 		return this.funcionario;
 	}
 	
@@ -185,7 +173,7 @@ public class FuncionarioService {
 		List<Funcionario> funcionariosJuniores = new ArrayList<>();
 		
 		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getNivel_permissao()==nivel_permissao.Senior) {
+			if(funcionario.getNivel_permissao()==nivel_permissao.Junior) {
 				funcionariosJuniores.add(funcionario);
 			}
 		}
@@ -272,17 +260,24 @@ public class FuncionarioService {
 		return false;
 	}
 	
-	public boolean verificarTodasTarefasConcluidas(Projeto projeto) {
+	public List<Tarefa> pegarTodasTarefasProjeto(Projeto projeto, List<Tarefa> tarefasProjeto){
 		List<Tarefa> tarefas = new ArrayList<>();
 		tarefas = tarefa_repository.findAll();
-		List<Tarefa> tarefasProjeto = new ArrayList<>();
-		int contadorTarefasConcluidas = 0;
 		
 		for(Tarefa tarefa: tarefas) {
 			if(tarefa.getProjeto()==projeto) {
 				tarefasProjeto.add(tarefa);
 			}
 		}
+		
+		return tarefasProjeto;
+	}
+	
+	public boolean verificarTodasTarefasConcluidas(Projeto projeto) {
+		List<Tarefa> tarefasProjeto = new ArrayList<>();
+		int contadorTarefasConcluidas = 0;
+		
+		tarefasProjeto = this.pegarTodasTarefasProjeto(projeto, tarefasProjeto);
 		
 		for(Tarefa tarefa: tarefasProjeto) {
 			if(tarefa.getStatus()==status.Concluido) {
@@ -322,7 +317,7 @@ public class FuncionarioService {
 	public boolean verificarSomentePrioridadeAlterada(Tarefa tarefa, Long id_tarefa) {
 		this.tarefa = tarefa_repository.findById(id_tarefa).get();
 		
-		if((this.tarefa.getDescricao_tarefa().equalsIgnoreCase(tarefa.getDescricao_tarefa())) && (this.tarefa.getId_tarefa()==tarefa.getId_tarefa()) && (this.tarefa.getNome_tarefa().equalsIgnoreCase(tarefa.getNome_tarefa())) && (this.tarefa.getProjeto()==tarefa.getProjeto()) && (this.tarefa.getStatus()==tarefa.getStatus())  ) {
+		if((this.tarefa.getDescricao_tarefa().equalsIgnoreCase(tarefa.getDescricao_tarefa())) && (this.tarefa.getId_tarefa().equals(tarefa.getId_tarefa())) && (this.tarefa.getNome_tarefa().equalsIgnoreCase(tarefa.getNome_tarefa())) && (this.tarefa.getProjeto().equals(tarefa.getProjeto())) && (this.tarefa.getStatus().equals(tarefa.getStatus()))  ) {
 			return true;
 		}
 		
@@ -356,11 +351,30 @@ public class FuncionarioService {
 		for(Projeto projeto: projetos) {
 			if(this.funcionario.getProjeto()==projeto) {
 				this.projeto = projeto;
-				break;
+				return this.projeto;
 			}
 		}
 		System.out.println("Este funcionario não tem um projeto atribuido");
 		return null;
+	}
+	
+	public List<Projeto> mostrarProjetosAtivos(){
+		List<Projeto> projetos = projeto_repository.findAll(); 
+		List<Projeto> projetosAtivos = new ArrayList<>();
+		for(Projeto projeto: projetos) {
+			if(projeto.isStatus()==true) {
+				projetosAtivos.add(projeto);
+			}
+		}
+		
+		if(projetosAtivos.isEmpty()) {
+			System.out.println("Nenhum projeto ativo");
+			return null;
+		}
+		else
+			return projetosAtivos;
+		
+		
 	}
 	
 }
