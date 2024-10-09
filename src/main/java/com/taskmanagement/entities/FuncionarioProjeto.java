@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -20,11 +21,11 @@ public class FuncionarioProjeto {
 	private LocalDate  data_participacao_inicial;
 	private LocalDate  data_participacao_final;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="projeto_id")
 	private Projeto projeto;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name="funcionario_id")
 	private Funcionario funcionario;
 	
@@ -79,8 +80,5 @@ public class FuncionarioProjeto {
 
 	public void setFuncionario(Funcionario funcionario) {
 		this.funcionario = funcionario;
-	}
-
-	
-	
+	}	
 }

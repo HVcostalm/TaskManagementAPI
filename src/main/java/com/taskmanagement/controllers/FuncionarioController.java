@@ -43,7 +43,7 @@ public class FuncionarioController {
 	@Autowired
 	private FuncionarioService funcionarioService;
 	
-	private LocalDate data;
+	private LocalDate data = LocalDate.now();
 	private Funcionario funcionario = new Funcionario();
 	private Projeto projeto = new Projeto();
 	private Tarefa tarefa = new Tarefa();
@@ -125,6 +125,17 @@ public class FuncionarioController {
 			return funcionarioRepository.findAll();
 		}
 		else {
+			System.out.println("Somente o administrador pode realizar essa ação");
+		}
+		return null;
+	}
+	
+	// Somente Administrador
+	@GetMapping(value = "/todos-funcionarios-ativos/{id_funcionario}")
+	public List<Funcionario> lerTodosFuncionariosAtivos(@PathVariable Long id_funcionario) {
+		if (funcionarioService.encontrarAdministrador(id_funcionario)) {
+			return funcionarioService.listarFuncionariosAtivos();
+		} else {
 			System.out.println("Somente o administrador pode realizar essa ação");
 		}
 		return null;
@@ -235,10 +246,14 @@ public class FuncionarioController {
 				this.funcionario = funcionarioRepository.findById(id_funcionario_senior).get();
 				this.funcionario.setProjeto(projeto);
 				funcionarioRepository.save(this.funcionario);
-				this.funcionario_projeto.setFuncionario(this.funcionario);
-				this.funcionario_projeto.setProjeto(projeto);
-				this.funcionario_projeto.setData_participacao_inicial(data);
-				funcionarioProjetoRepository.save(this.funcionario_projeto);
+				FuncionarioProjeto funcionarioProjetoNovo = new FuncionarioProjeto();
+				
+				funcionarioProjetoNovo.setData_participacao_inicial(data);
+				funcionarioProjetoNovo.setData_participacao_final(null);
+				funcionarioProjetoNovo.setFuncionario(this.funcionario);
+				funcionarioProjetoNovo.setProjeto(projeto);
+
+				funcionarioProjetoRepository.save(funcionarioProjetoNovo);
 				return projeto;
 			} else {
 				System.out.println("Não pode criar projeto sem ter um funcionario senior");
@@ -271,29 +286,37 @@ public class FuncionarioController {
 	}
 	
 	// Somente senior e um total de 7 funcionarios
-	@PutMapping(value="/atribuir-projeto-funcionario/{id_funcionario}/{id_projeto}/{id_funcionario_junior_senior}")
-	public Funcionario atribuirProjetoFuncionario(@PathVariable Long id_funcionario, @PathVariable Long id_projeto, @PathVariable Long id_funcionario_junior_senior) {
-		if(funcionarioService.encontrarSenior(id_funcionario)) {
+	@PutMapping(value="/atribuir-projeto-funcionario/{id_funcionario_senior}/{id_projeto}/{id_funcionario_junior_senior}")
+	public Funcionario atribuirProjetoFuncionario(@PathVariable Long id_funcionario_senior, @PathVariable Long id_projeto, @PathVariable Long id_funcionario_junior_senior) {
+		this.projeto = projetoRepository.findById(id_projeto).get();
+		if(funcionarioService.encontrarSenior(id_funcionario_senior)) {
 			if(funcionarioService.verificarExisteProjeto(id_projeto) && this.projeto.isStatus()==true) {
-				if(funcionarioService.verificarSeniorProjeto(id_funcionario, id_projeto)) {
-					if(funcionarioService.verificarQuantidadeFuncionariosProjeto(id_projeto)) {
-						this.projeto = projetoRepository.findById(id_projeto).get();
-						
-						this.funcionario = funcionarioRepository.findById(id_funcionario).get();
-						this.funcionario.setProjeto(this.projeto);
-						funcionarioRepository.save(this.funcionario);
-						
-						this.funcionario_projeto.setData_participacao_inicial(data);
-						this.funcionario_projeto.setData_participacao_final(null);
-						this.funcionario_projeto.setFuncionario(this.funcionario);
-						this.funcionario_projeto.setProjeto(this.projeto);
-						
-						funcionarioProjetoRepository.save(this.funcionario_projeto);
-						
-						return this.funcionario;
+				if(funcionarioService.verificarSeniorProjeto(id_funcionario_senior, id_projeto)) {
+					if((funcionarioService.encontrarSenior(id_funcionario_junior_senior)) || (funcionarioService.encontrarJunior(id_funcionario_junior_senior))) {
+						if(funcionarioService.verificarFuncionarioSemProjeto(id_funcionario_junior_senior, id_projeto)) {
+							if (funcionarioService.verificarQuantidadeFuncionariosProjeto(id_projeto)) {
+								this.funcionario = funcionarioRepository.findById(id_funcionario_junior_senior).get();
+								this.funcionario.setProjeto(this.projeto);
+								funcionarioRepository.save(this.funcionario);
+								
+								FuncionarioProjeto funcionarioProjetoNovo = new FuncionarioProjeto();
+								
+								funcionarioProjetoNovo.setData_participacao_inicial(data);
+								funcionarioProjetoNovo.setData_participacao_final(null);
+								funcionarioProjetoNovo.setFuncionario(this.funcionario);
+								funcionarioProjetoNovo.setProjeto(this.projeto);
+
+								funcionarioProjetoRepository.save(funcionarioProjetoNovo);
+
+								return this.funcionario;
+							} else
+								System.out.println("Projeto cheio");
+						}
+						else
+							System.out.println("Este funcionario está em um projeto diferente ou não está em um projeto");
 					}
 					else
-						System.out.println("Projeto cheio");
+						System.out.println("Senior ou junior inexistente");
 				}
 				else
 					System.out.println("Este senior não foi atribuido para este projeto");
@@ -371,15 +394,15 @@ public class FuncionarioController {
 			if(funcionarioService.encontrarTarefa(id_tarefa)) {
 				this.funcionario = funcionarioRepository.findById(id_funcionario).get();
 				this.tarefa = tarefaRepository.findById(id_tarefa).get();
-				this.projeto = projetoRepository.findById(this.funcionario.getProjeto().getId_projeto()).get();
+				this.projeto = projetoRepository.findById(this.tarefa.getProjeto().getId_projeto()).get();
 				if(this.projeto.isStatus()==true) {
 					if(this.funcionario.getProjeto()==this.tarefa.getProjeto()) {
-						if(funcionarioService.verificarSomentePrioridadeAlterada(tarefa, id_tarefa)) {
+						if(funcionarioService.verificarSomenteNomeDescricaoPrioridadeAlterada(tarefa, id_tarefa)) {
 							tarefaRepository.save(tarefa);
-							return this.tarefa;
+							return tarefa;
 						}
 						else {
-							System.out.println("Outra informação que não é a prioridade foi alterada");
+							System.out.println("Outra informação que não é a prioridade, nome ou descrição foi alterada");
 							return this.tarefa;
 						}							
 					}
@@ -442,6 +465,27 @@ public class FuncionarioController {
 			} else
 				System.out.println("Projeto inexistente ou concluido");
 		} else
+			System.out.println("Somente o administrador pode realizar essa ação");
+	}
+	
+	@PutMapping(value = "/demitir-funcionario/{id_funcionario}/{id_funcionario_demitido}") // Somente administrador
+	public void demitirFuncionario(@PathVariable Long id_funcionario, @PathVariable Long id_funcionario_demitido) {
+		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
+			if(funcionarioService.encontrarFuncionario(id_funcionario_demitido)!=null) {
+				if (funcionarioService.verificarFuncionarioProjetoDemicao(id_funcionario_demitido)) {
+					this.funcionario = funcionarioRepository.findById(id_funcionario_demitido).get();
+					
+					this.funcionario.setStatus(false);
+					
+					funcionarioRepository.save(this.funcionario);
+					
+				} else
+					System.out.println("Funcionario está em um projeto");
+			}
+			else
+				System.out.println("Funcionario inexistente para ser demitido");
+		}
+		else
 			System.out.println("Somente o administrador pode realizar essa ação");
 	}
 	

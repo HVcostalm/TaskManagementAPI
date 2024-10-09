@@ -38,11 +38,25 @@ public class FuncionarioService {
 	private Tarefa tarefa;
 	private NivelPermissao nivel_permissao;
 	private Status status;
-	private LocalDate data;
+	private LocalDate data = LocalDate.now();
 	
 	public Funcionario encontrarFuncionario(Long id_funcionario) {
 		this.funcionario = funcionario_repository.findById(id_funcionario).get();
 		return this.funcionario;
+	}
+	
+	public List<Funcionario> listarFuncionariosAtivos(){
+		List<Funcionario> funcionarios = new ArrayList<>();
+		funcionarios = funcionario_repository.findAll();
+		List<Funcionario> funcionariosAtivos = new ArrayList<>();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.isStatus()==true) {
+				funcionariosAtivos.add(funcionario);
+			}
+		}
+		
+		return funcionariosAtivos;
 	}
 	
 	public boolean criarProjeto(Long id_funcionario) {
@@ -203,6 +217,39 @@ public class FuncionarioService {
 			return false;
 	}
 	
+	public boolean verificarFuncionarioSemProjeto(Long id_funcionario, Long id_projeto) {
+		this.funcionario = funcionario_repository.findById(id_funcionario).get();
+		this.projeto = projeto_repository.findById(id_projeto).get();
+		
+		if(this.funcionario.getProjeto()!=this.projeto || this.funcionario.getProjeto()==null ) {
+			return true;
+		}
+		else {
+			return false;
+		}
+			
+	}
+	
+	public boolean verificarFuncionarioProjetoDemicao(Long id_funcionario) {
+		this.funcionario = funcionario_repository.findById(id_funcionario).get();
+		List<Projeto> projetos = new ArrayList<>();
+		projetos = projeto_repository.findAll();
+		this.projeto=null;
+		
+		for(Projeto projeto: projetos) {
+			if(this.funcionario.getProjeto()==projeto) {
+				this.projeto = projeto;
+			}
+		}
+		
+		if(this.projeto==null) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	public boolean verificarQuantidadeFuncionariosProjeto(Long id_projeto) {
 		List<Funcionario> funcionarios = new ArrayList<>();
 		funcionarios = funcionario_repository.findAll();
@@ -250,15 +297,6 @@ public class FuncionarioService {
 		return false;
 	}
 	
-	public boolean verificarSomenteSenhaEmailAlterados(Funcionario funcionario, Long id_funcionario) {
-		this.funcionario = funcionario_repository.findById(id_funcionario).get();
-		
-		if( (this.funcionario.getProjeto()==funcionario.getProjeto()) && (this.funcionario.getNivel_permissao()==funcionario.getNivel_permissao()) && (this.funcionario.getLogin_funcionario().equalsIgnoreCase(funcionario.getLogin_funcionario())) && (this.funcionario.getId_funcionario()==funcionario.getId_funcionario())  ) {
-			return true;
-		}
-		
-		return false;
-	}
 	
 	public List<Tarefa> pegarTodasTarefasProjeto(Projeto projeto, List<Tarefa> tarefasProjeto){
 		List<Tarefa> tarefas = new ArrayList<>();
@@ -314,10 +352,20 @@ public class FuncionarioService {
 		
 	}
 	
-	public boolean verificarSomentePrioridadeAlterada(Tarefa tarefa, Long id_tarefa) {
+	public boolean verificarSomenteSenhaEmailAlterados(Funcionario funcionario, Long id_funcionario) {
+		this.funcionario = funcionario_repository.findById(id_funcionario).get();
+		
+		if( (this.funcionario.getProjeto()==funcionario.getProjeto()) && (this.funcionario.getNivel_permissao()==funcionario.getNivel_permissao()) && (this.funcionario.getLogin_funcionario().equalsIgnoreCase(funcionario.getLogin_funcionario())) && (this.funcionario.getId_funcionario()==funcionario.getId_funcionario())  ) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean verificarSomenteNomeDescricaoPrioridadeAlterada(Tarefa tarefa, Long id_tarefa) {
 		this.tarefa = tarefa_repository.findById(id_tarefa).get();
 		
-		if((this.tarefa.getDescricao_tarefa().equalsIgnoreCase(tarefa.getDescricao_tarefa())) && (this.tarefa.getId_tarefa().equals(tarefa.getId_tarefa())) && (this.tarefa.getNome_tarefa().equalsIgnoreCase(tarefa.getNome_tarefa())) && (this.tarefa.getProjeto().equals(tarefa.getProjeto())) && (this.tarefa.getStatus().equals(tarefa.getStatus()))  ) {
+		if(this.tarefa.getProjeto().getId_projeto()==tarefa.getProjeto().getId_projeto() && this.tarefa.getStatus()==tarefa.getStatus() && this.tarefa.getId_tarefa()==tarefa.getId_tarefa()) {
 			return true;
 		}
 		
@@ -372,9 +420,6 @@ public class FuncionarioService {
 			return null;
 		}
 		else
-			return projetosAtivos;
-		
-		
-	}
-	
+			return projetosAtivos;		
+	}	
 }
