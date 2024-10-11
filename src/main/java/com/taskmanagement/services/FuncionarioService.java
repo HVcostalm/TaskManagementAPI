@@ -375,7 +375,9 @@ public class FuncionarioService {
 	public boolean verificarSomenteMudancaNomeDescricao(Projeto projeto, Long id_projeto){
 		this.projeto = projeto_repository.findById(id_projeto).get();
 		
-		if(this.projeto.getId_projeto()==projeto.getId_projeto() && this.projeto.getData_prevista_entrega()==projeto.getData_prevista_entrega() && this.projeto.getData_conclusao()==projeto.getData_conclusao() && this.projeto.isStatus()==projeto.isStatus()) {
+		
+		
+		if(this.projeto.getId_projeto()==projeto.getId_projeto() && this.projeto.getData_prevista_entrega().isEqual(projeto.getData_prevista_entrega()) && (this.projeto.getData_conclusao()==null && projeto.getData_conclusao()==null) && this.projeto.isStatus()==projeto.isStatus()) {
 			return true;
 		}
 		return false;
