@@ -286,7 +286,7 @@ public class FuncionarioController {
 	@PutMapping(value="/atualizar-senha-email/{id_funcionario}")
 	public Funcionario atualizarFuncionario(@RequestBody Funcionario funcionario, @PathVariable Long id_funcionario) {
 		if(funcionarioService.encontrarFuncionarioParaAtualizarInformacao(id_funcionario)) {
-			if(funcionarioService.verificarSomenteSenhaEmailAlterados(funcionario, id_funcionario)) {
+			if(funcionarioService.verificarSomenteMudancaSenhaEmailAlterados(funcionario, id_funcionario)) {
 				System.out.println("Senha ou email atualizado");
 				return funcionarioRepository.save(funcionario);
 			}
@@ -411,7 +411,7 @@ public class FuncionarioController {
 				this.projeto = projetoRepository.findById(this.tarefa.getProjeto().getId_projeto()).get();
 				if(this.projeto.isStatus()==true) {
 					if(this.funcionario.getProjeto()==this.tarefa.getProjeto()) {
-						if(funcionarioService.verificarSomenteNomeDescricaoPrioridadeAlterada(tarefa, id_tarefa)) {
+						if(funcionarioService.verificarSomenteMudancaNomeDescricaoPrioridadeAlterada(tarefa, id_tarefa)) {
 							tarefaRepository.save(tarefa);
 							return tarefa;
 						}
@@ -480,6 +480,29 @@ public class FuncionarioController {
 				System.out.println("Projeto inexistente ou concluido");
 		} else
 			System.out.println("Somente o administrador pode realizar essa ação");
+	}
+	
+	@PutMapping(value = "/atualizar-projeto/{id_funcionario}/{id_projeto}") // Somente senior
+	public Projeto atualizarProjeto(@RequestBody Projeto projeto, @PathVariable Long id_projeto, @PathVariable Long id_funcionario) {
+		this.projeto = projetoRepository.findById(id_projeto).get();
+		if( (funcionarioService.encontrarSenior(id_funcionario))) {
+			if(funcionarioService.verificarExisteProjeto(id_projeto) && (this.projeto.isStatus() == true)) {
+				if(funcionarioService.verificarSomenteMudancaNomeDescricao(projeto, id_projeto)) {
+					projetoRepository.save(projeto);
+					return projeto;
+				}
+				else {
+					System.out.println("Outra informação que não é o nome ou descrição foi alterada");
+					return this.projeto;
+				}		
+			}
+			else
+				System.out.println("Projeto inexistente ou concluido");
+		}
+		else
+			System.out.println("Somente o senior pode realizar essa ação ");
+		
+		return null;
 	}
 	
 	@PutMapping(value = "/demitir-funcionario/{id_funcionario}/{id_funcionario_demitido}") // Somente administrador

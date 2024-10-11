@@ -352,7 +352,7 @@ public class FuncionarioService {
 		
 	}
 	
-	public boolean verificarSomenteSenhaEmailAlterados(Funcionario funcionario, Long id_funcionario) {
+	public boolean verificarSomenteMudancaSenhaEmailAlterados(Funcionario funcionario, Long id_funcionario) {
 		this.funcionario = funcionario_repository.findById(id_funcionario).get();
 		
 		if( (this.funcionario.getProjeto()==funcionario.getProjeto()) && (this.funcionario.getNivel_permissao()==funcionario.getNivel_permissao()) && (this.funcionario.getLogin_funcionario().equalsIgnoreCase(funcionario.getLogin_funcionario())) && (this.funcionario.getId_funcionario()==funcionario.getId_funcionario())  ) {
@@ -362,13 +362,22 @@ public class FuncionarioService {
 		return false;
 	}
 	
-	public boolean verificarSomenteNomeDescricaoPrioridadeAlterada(Tarefa tarefa, Long id_tarefa) {
+	public boolean verificarSomenteMudancaNomeDescricaoPrioridadeAlterada(Tarefa tarefa, Long id_tarefa) {
 		this.tarefa = tarefa_repository.findById(id_tarefa).get();
 		
 		if(this.tarefa.getProjeto().getId_projeto()==tarefa.getProjeto().getId_projeto() && this.tarefa.getStatus()==tarefa.getStatus() && this.tarefa.getId_tarefa()==tarefa.getId_tarefa()) {
 			return true;
 		}
 		
+		return false;
+	}
+	
+	public boolean verificarSomenteMudancaNomeDescricao(Projeto projeto, Long id_projeto){
+		this.projeto = projeto_repository.findById(id_projeto).get();
+		
+		if(this.projeto.getId_projeto()==projeto.getId_projeto() && this.projeto.getData_prevista_entrega()==projeto.getData_prevista_entrega() && this.projeto.getData_conclusao()==projeto.getData_conclusao() && this.projeto.isStatus()==projeto.isStatus()) {
+			return true;
+		}
 		return false;
 	}
 	
