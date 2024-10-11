@@ -66,12 +66,17 @@ public class FuncionarioController {
 	@GetMapping(value="/visualizar-tarefas-projeto/{id_funcionario}/{id_projeto}")
 	public List<Tarefa> lerTarefasProjeto(@PathVariable Long id_funcionario, @PathVariable Long id_projeto) {
 		if( (funcionarioService.encontrarSenior(id_funcionario)) || (funcionarioService.encontrarJunior(id_funcionario)) ) {
-			this.projeto = projetoRepository.findById(id_projeto).get();
-			if(this.projeto!=null && this.projeto.isStatus()==true) {
-				return funcionarioService.listarTarefasProjeto(projeto);
+			this.funcionario = funcionarioRepository.findById(id_funcionario).get();
+			if(this.funcionario.getProjeto()!=null) {
+				this.projeto = projetoRepository.findById(id_projeto).get();
+				if(this.projeto!=null && this.projeto.isStatus()==true) {
+					return funcionarioService.listarTarefasProjeto(projeto);
+				}
+				else
+					System.out.println("Projeto inexistente ou concluido");
 			}
 			else
-				System.out.println("Projeto inexistente ou concluido");
+				System.out.println("Este funcionario não tem projeto atribuido");
 		}
 		else
 			System.out.println("Junior ou Senior inexistente");
@@ -82,25 +87,29 @@ public class FuncionarioController {
 	@GetMapping(value="/visualizar-tarefa-especifica/{id_funcionario}/{id_projeto}/{id_tarefa}")
 	public Tarefa lerTarefaEspecifica(@PathVariable Long id_funcionario, @PathVariable Long id_projeto, @PathVariable Long id_tarefa) {
 		if( (funcionarioService.encontrarSenior(id_funcionario)) || (funcionarioService.encontrarJunior(id_funcionario)) ) {
-			this.projeto = projetoRepository.findById(id_projeto).get();
-			if(this.projeto!=null && this.projeto.isStatus()==true) {
-				if(funcionarioService.encontrarTarefa(id_tarefa)) {
-					this.tarefa = tarefaRepository.findById(id_tarefa).get();
-					if(this.tarefa.getProjeto()==this.projeto) {
-						return this.tarefa;
+			this.funcionario = funcionarioRepository.findById(id_funcionario).get();
+			if(this.funcionario.getProjeto()!=null) {
+				this.projeto = projetoRepository.findById(id_projeto).get();
+				if(this.projeto!=null && this.projeto.isStatus()==true) {
+					if(funcionarioService.encontrarTarefa(id_tarefa)) {
+						this.tarefa = tarefaRepository.findById(id_tarefa).get();
+						if(this.tarefa.getProjeto()==this.projeto) {
+							return this.tarefa;
+						}
+						else {
+							System.out.println("Esta tarefa não faz parte deste projeto");
+						}
 					}
 					else {
-						System.out.println("Esta tarefa não faz parte deste projeto");
+						System.out.println("Tarefa inexistente");
 					}
 				}
 				else {
-					System.out.println("Tarefa inexistente");
+					System.out.println("Projeto inexistente ou concluido");
 				}
 			}
-			else {
-				System.out.println("Projeto inexistente ou concluido");
-			}
-				
+			else
+				System.out.println("Este funcionario não tem projeto atribuido");				
 		}
 		else {
 			System.out.println("Junior ou Senior inexistente");
@@ -141,6 +150,7 @@ public class FuncionarioController {
 		return null;
 	}
 	
+	// Somente Administrador
 	@GetMapping(value="/todos-funcionarios-juniores/{id_funcionario}")
 	public List<Funcionario> lerFuncionariosJuniores(@PathVariable Long id_funcionario){
 		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
@@ -152,6 +162,7 @@ public class FuncionarioController {
 		return null;
 	}
 	
+	// Somente Administrador
 	@GetMapping(value="/todos-funcionarios-seniores/{id_funcionario}")
 	public List<Funcionario> lerFuncionariosSeniores(@PathVariable Long id_funcionario){
 		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
@@ -163,6 +174,7 @@ public class FuncionarioController {
 		return null;
 	}
 	
+	// Somente Administrador
 	@GetMapping(value="/todos-administradores/{id_funcionario}")
 	public List<Funcionario> lerAdministradores(@PathVariable Long id_funcionario){
 		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
@@ -174,6 +186,7 @@ public class FuncionarioController {
 		return null;
 	}
 	
+	// Somente Administrador
 	@GetMapping(value="/todos-projetos-ativos/{id_funcionario}")
 	public List<Projeto> listarProjetosAtivos(@PathVariable Long id_funcionario) { // Somente administrador
 		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
@@ -185,6 +198,7 @@ public class FuncionarioController {
 		return null;
 	}
 	
+	// Somente Administrador
 	@GetMapping(value="/todos-projetos/{id_funcionario}")
 	public List<Projeto> listarProjetos(@PathVariable Long id_funcionario) { // Somente administrador
 		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
