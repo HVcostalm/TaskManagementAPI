@@ -18,6 +18,8 @@ import com.taskmanagement.repositories.FuncionarioRepository;
 import com.taskmanagement.repositories.ProjetoRepository;
 import com.taskmanagement.repositories.TarefaRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class FuncionarioService {
 	
@@ -41,158 +43,97 @@ public class FuncionarioService {
 	private LocalDate data = LocalDate.now();
 	
 	public Funcionario encontrarFuncionario(Long id_funcionario) {
-		this.funcionario = funcionario_repository.findById(id_funcionario).get();
-		return this.funcionario;
+		return this.funcionario = funcionario_repository.findById(id_funcionario).get();
 	}
 	
 	public List<Funcionario> listarFuncionariosAtivos(){
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		List<Funcionario> funcionariosAtivos = new ArrayList<>();
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.isStatus()==true) {
-				funcionariosAtivos.add(funcionario);
-			}
-		}
-		
-		return funcionariosAtivos;
+		return funcionario_repository.findByStatusTrue();
 	}
 	
 	public boolean criarProjeto(Long id_funcionario) {
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		boolean criarProjetoSucesso = true, existeFuncionarioSenior = false;
+		boolean existeFuncionarioSenior;
 		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Senior) {
-				this.funcionario = funcionario;
-				existeFuncionarioSenior = true;
-				break;
-			}
-		}
+		existeFuncionarioSenior = this.encontrarSenior(id_funcionario);
 		
 		if(existeFuncionarioSenior) {
 			if(this.funcionario.getProjeto()==null) {
-				return criarProjetoSucesso;
+				return true;
 			}
 			else {
 				System.out.println("Funcionario Senior está em outro projeto");
-				return criarProjetoSucesso = false;
+				return false;
 			}
 		}
 		else {
 			System.out.println("Funcionario Senior inexistente");
-			return criarProjetoSucesso = false;
+			return false;
 		}
+	}
+	
+	public boolean encontrarFuncionarioPorNivelPermissao(Long id_funcionario, NivelPermissao nivel) {
+	    List<Funcionario> funcionarios = funcionario_repository.findAll();
+	    
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getId_funcionario()==id_funcionario && funcionario.getNivel_permissao()==nivel && funcionario.isStatus()==true) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public List<Funcionario> listarFuncionariosPorNivelPermissao(NivelPermissao nivel){
+		List<Funcionario> funcionarios = funcionario_repository.findAll();
+		List<Funcionario> funcionariosNivelPermissao = new ArrayList<>();
+		
+		for(Funcionario funcionario: funcionarios) {
+			if(funcionario.getNivel_permissao()==nivel) {
+				funcionariosNivelPermissao.add(funcionario);
+			}
+		}
+		
+		return funcionariosNivelPermissao;
 	}
 	
 	public boolean encontrarAdministrador(Long id_funcionario) {
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		boolean realizarAcao = true, existeAdministrador = false;
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Administrador && funcionario.isStatus()==true) {
-				this.funcionario = funcionario;
-				existeAdministrador = true;
-				break;
-			}
+		boolean existe = this.encontrarFuncionarioPorNivelPermissao(id_funcionario, NivelPermissao.Administrador);
+
+		if (!existe) {
+			System.out.println("Administrador inexistente ou demitido");
 		}
-		
-		if(existeAdministrador) {
-			return realizarAcao;
-		}
-		else {
-			System.out.println("Administrador inexistente");
-			return realizarAcao = false;
-		}
+
+		return existe;
 	}
 	
 	public List<Funcionario> listarAdministradores(){
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		List<Funcionario> funcionariosAdministradores = new ArrayList<>();
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getNivel_permissao()==nivel_permissao.Administrador) {
-				funcionariosAdministradores.add(funcionario);
-			}
-		}
-		
-		return funcionariosAdministradores;
+		return this.listarFuncionariosPorNivelPermissao(NivelPermissao.Administrador);
 	}
 	
 	public boolean encontrarSenior(Long id_funcionario) {
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		boolean realizarAcao = true, existeSenior = false;
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Senior && funcionario.isStatus()==true) {
-				this.funcionario = funcionario;
-				existeSenior = true;
-				break;
-			}
+		boolean existe = this.encontrarFuncionarioPorNivelPermissao(id_funcionario, NivelPermissao.Senior);
+
+		if (!existe) {
+			System.out.println("Senior inexistente ou demitido");
 		}
-		
-		if(existeSenior) {
-			return realizarAcao;
-		}
-		else {
-			System.out.println("Senior inexistente");
-			return realizarAcao = false;
-		}
+
+		return existe;
 	}
 	
 	public List<Funcionario> listarSeniores(){
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		List<Funcionario> funcionariosSeniores = new ArrayList<>();
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getNivel_permissao()==nivel_permissao.Senior) {
-				funcionariosSeniores.add(funcionario);
-			}
-		}
-		
-		return funcionariosSeniores;
+		return this.listarFuncionariosPorNivelPermissao(NivelPermissao.Senior);
 	}
 	
 	public boolean encontrarJunior(Long id_funcionario) {
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		boolean realizarAcao = true, existeJunior = false;
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getId_funcionario() == id_funcionario && funcionario.getNivel_permissao()==nivel_permissao.Junior && funcionario.isStatus()==true) {
-				this.funcionario = funcionario;
-				existeJunior = true;
-				break;
-			}
+		boolean existe = this.encontrarFuncionarioPorNivelPermissao(id_funcionario, NivelPermissao.Junior);
+
+		if (!existe) {
+			System.out.println("Junior inexistente ou demitido");
 		}
-		
-		if(existeJunior) {
-			return realizarAcao;
-		}
-		else {
-			System.out.println("Junior inexistente");
-			return realizarAcao = false;
-		}
+
+		return existe;
 	}
 	
 	public List<Funcionario> listarJuniores(){
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		List<Funcionario> funcionariosJuniores = new ArrayList<>();
-		
-		for(Funcionario funcionario: funcionarios) {
-			if(funcionario.getNivel_permissao()==nivel_permissao.Junior) {
-				funcionariosJuniores.add(funcionario);
-			}
-		}
-		
-		return funcionariosJuniores;
+		return this.listarFuncionariosPorNivelPermissao(NivelPermissao.Junior);
 	}
 	
 	public boolean verificarExisteProjeto(Long id_projeto) {
@@ -217,11 +158,10 @@ public class FuncionarioService {
 			return false;
 	}
 	
-	public boolean verificarFuncionarioSemProjeto(Long id_funcionario, Long id_projeto) {
+	public boolean verificarFuncionarioSemProjeto(Long id_funcionario) {
 		this.funcionario = funcionario_repository.findById(id_funcionario).get();
-		this.projeto = projeto_repository.findById(id_projeto).get();
 		
-		if(this.funcionario.getProjeto()!=this.projeto || this.funcionario.getProjeto()==null ) {
+		if(this.funcionario.getProjeto()==null ) {
 			return true;
 		}
 		else {
@@ -234,20 +174,14 @@ public class FuncionarioService {
 		this.funcionario = funcionario_repository.findById(id_funcionario).get();
 		List<Projeto> projetos = new ArrayList<>();
 		projetos = projeto_repository.findAll();
-		this.projeto=null;
 		
 		for(Projeto projeto: projetos) {
 			if(this.funcionario.getProjeto()==projeto) {
-				this.projeto = projeto;
+				return false;
 			}
 		}
 		
-		if(this.projeto==null) {
-			return true;
-		}
-		else {
-			return false;
-		}
+		return true;
 	}
 	
 	public boolean verificarQuantidadeFuncionariosProjeto(Long id_projeto) {
@@ -270,33 +204,15 @@ public class FuncionarioService {
 	public boolean encontrarTarefa(Long id_tarefa) {
 		List<Tarefa> tarefas = new ArrayList<>();
 		tarefas = tarefa_repository.findAll();
-		boolean tarefaEncontrada = false;
 		
 		for(Tarefa tarefa: tarefas) {
 			if(tarefa.getId_tarefa()==id_tarefa) {
-				tarefaEncontrada = true;
-				break;
-			}
-		}
-		
-		if(tarefaEncontrada)
-			return true;
-		else
-			return false;
-	}
-	
-	public boolean encontrarFuncionarioParaAtualizarInformacao(Long id_funcionario) {
-		List<Funcionario> funcionarios = new ArrayList<>();
-		funcionarios = funcionario_repository.findAll();
-		
-		for(Funcionario funcionario: funcionarios) {
-			if( (funcionario.getId_funcionario() == id_funcionario) && (funcionario.isStatus()==true) ) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
-	
 	
 	public List<Tarefa> pegarTodasTarefasProjeto(Projeto projeto, List<Tarefa> tarefasProjeto){
 		List<Tarefa> tarefas = new ArrayList<>();
@@ -330,6 +246,7 @@ public class FuncionarioService {
 			return false;
 	}
 	
+	@Transactional
 	public void finalizarProjetoFuncionarios(Projeto projeto) {
 		List<Funcionario> funcionarios = new ArrayList<>();
 		funcionarios = funcionario_repository.findAll();
@@ -374,9 +291,7 @@ public class FuncionarioService {
 	
 	public boolean verificarSomenteMudancaNomeDescricao(Projeto projeto, Long id_projeto){
 		this.projeto = projeto_repository.findById(id_projeto).get();
-		
-		
-		
+				
 		if(this.projeto.getId_projeto()==projeto.getId_projeto() && this.projeto.getData_prevista_entrega().isEqual(projeto.getData_prevista_entrega()) && (this.projeto.getData_conclusao()==null && projeto.getData_conclusao()==null) && this.projeto.isStatus()==projeto.isStatus()) {
 			return true;
 		}
@@ -384,15 +299,9 @@ public class FuncionarioService {
 	}
 	
 	public List<Tarefa> listarTarefasProjeto(Projeto projeto){
-		List<Tarefa> tarefas = new ArrayList<>();
-		tarefas = tarefa_repository.findAll();
 		List<Tarefa> tarefasProjeto = new ArrayList<>();
 		
-		for(Tarefa tarefa: tarefas) {
-			if(tarefa.getProjeto()==projeto) {
-				tarefasProjeto.add(tarefa);
-			}
-		}
+		tarefasProjeto = this.pegarTodasTarefasProjeto(projeto, tarefasProjeto);
 		
 		if(tarefasProjeto.isEmpty()) {
 			System.out.println("Nenhuma tarefa foi criada");
@@ -409,8 +318,7 @@ public class FuncionarioService {
 		
 		for(Projeto projeto: projetos) {
 			if(this.funcionario.getProjeto()==projeto) {
-				this.projeto = projeto;
-				return this.projeto;
+				return projeto;
 			}
 		}
 		System.out.println("Este funcionario não tem um projeto atribuido");
@@ -420,6 +328,7 @@ public class FuncionarioService {
 	public List<Projeto> mostrarProjetosAtivos(){
 		List<Projeto> projetos = projeto_repository.findAll(); 
 		List<Projeto> projetosAtivos = new ArrayList<>();
+		
 		for(Projeto projeto: projetos) {
 			if(projeto.isStatus()==true) {
 				projetosAtivos.add(projeto);

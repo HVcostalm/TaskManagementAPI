@@ -47,7 +47,6 @@ public class FuncionarioController {
 	private Funcionario funcionario = new Funcionario();
 	private Projeto projeto = new Projeto();
 	private Tarefa tarefa = new Tarefa();
-	private FuncionarioProjeto funcionario_projeto = new FuncionarioProjeto();
 	private Status status;
 	
 	// GET
@@ -285,7 +284,7 @@ public class FuncionarioController {
 	// senha e email
 	@PutMapping(value="/atualizar-senha-email/{id_funcionario}")
 	public Funcionario atualizarFuncionario(@RequestBody Funcionario funcionario, @PathVariable Long id_funcionario) {
-		if(funcionarioService.encontrarFuncionarioParaAtualizarInformacao(id_funcionario)) {
+		if(funcionarioService.encontrarFuncionario(id_funcionario)!= null) {
 			if(funcionarioService.verificarSomenteMudancaSenhaEmailAlterados(funcionario, id_funcionario)) {
 				System.out.println("Senha ou email atualizado");
 				return funcionarioRepository.save(funcionario);
@@ -307,7 +306,7 @@ public class FuncionarioController {
 			if(funcionarioService.verificarExisteProjeto(id_projeto) && this.projeto.isStatus()==true) {
 				if(funcionarioService.verificarSeniorProjeto(id_funcionario_senior, id_projeto)) {
 					if((funcionarioService.encontrarSenior(id_funcionario_junior_senior)) || (funcionarioService.encontrarJunior(id_funcionario_junior_senior))) {
-						if(funcionarioService.verificarFuncionarioSemProjeto(id_funcionario_junior_senior, id_projeto)) {
+						if(funcionarioService.verificarFuncionarioSemProjeto(id_funcionario_junior_senior)) {
 							if (funcionarioService.verificarQuantidadeFuncionariosProjeto(id_projeto)) {
 								this.funcionario = funcionarioRepository.findById(id_funcionario_junior_senior).get();
 								this.funcionario.setProjeto(this.projeto);
@@ -327,7 +326,7 @@ public class FuncionarioController {
 								System.out.println("Projeto cheio");
 						}
 						else
-							System.out.println("Este funcionario está em um projeto diferente ou não está em um projeto");
+							System.out.println("Este funcionario já está em um projeto");
 					}
 					else
 						System.out.println("Senior ou junior inexistente");
@@ -454,7 +453,6 @@ public class FuncionarioController {
 				}
 				else {
 					System.out.println("Uma ou mais tarefas não estão concluidas");
-					this.lerTarefasProjeto(id_funcionario, id_projeto);
 				}
 					
 			}
