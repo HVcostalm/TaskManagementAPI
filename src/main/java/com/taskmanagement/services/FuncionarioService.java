@@ -141,14 +141,14 @@ public class FuncionarioService {
 		projetos = projeto_repository.findAll();
 		
 		for(Projeto projeto: projetos) {
-			if(projeto.getId_projeto()==id_projeto) {
+			if(projeto.getId_projeto()==id_projeto && projeto.isStatus()==true) {
 				return true;
 			}
 		}
 			return false;
 	}
 	
-	public boolean verificarSeniorProjeto(Long id_funcionario, Long id_projeto) {
+	public boolean verificarFuncionarioProjeto(Long id_funcionario, Long id_projeto) {
 		this.funcionario = funcionario_repository.findById(id_funcionario).get();
 		this.projeto = projeto_repository.findById(id_projeto).get();
 		
@@ -168,20 +168,6 @@ public class FuncionarioService {
 			return false;
 		}
 			
-	}
-	
-	public boolean verificarFuncionarioProjetoDemicao(Long id_funcionario) {
-		this.funcionario = funcionario_repository.findById(id_funcionario).get();
-		List<Projeto> projetos = new ArrayList<>();
-		projetos = projeto_repository.findAll();
-		
-		for(Projeto projeto: projetos) {
-			if(this.funcionario.getProjeto()==projeto) {
-				return false;
-			}
-		}
-		
-		return true;
 	}
 	
 	public boolean verificarQuantidadeFuncionariosProjeto(Long id_projeto) {

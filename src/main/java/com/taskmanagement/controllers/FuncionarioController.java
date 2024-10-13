@@ -65,17 +65,15 @@ public class FuncionarioController {
 	@GetMapping(value="/visualizar-tarefas-projeto/{id_funcionario}/{id_projeto}")
 	public List<Tarefa> lerTarefasProjeto(@PathVariable Long id_funcionario, @PathVariable Long id_projeto) {
 		if( (funcionarioService.encontrarSenior(id_funcionario)) || (funcionarioService.encontrarJunior(id_funcionario)) ) {
-			this.funcionario = funcionarioRepository.findById(id_funcionario).get();
-			if(this.funcionario.getProjeto()!=null) {
-				this.projeto = projetoRepository.findById(id_projeto).get();
-				if(this.projeto!=null && this.projeto.isStatus()==true) {
-					return funcionarioService.listarTarefasProjeto(projeto);
-				}
-				else
-					System.out.println("Projeto inexistente ou concluido");
+			if(funcionarioService.verificarExisteProjeto(id_projeto)) {
+				if (funcionarioService.verificarFuncionarioProjeto(id_funcionario, id_projeto)) {
+					this.projeto = projetoRepository.findById(id_projeto).get();
+					return funcionarioService.listarTarefasProjeto(this.projeto);
+				} else
+					System.out.println("Este funcionario não foi atribuido a este projeto");
 			}
 			else
-				System.out.println("Este funcionario não tem projeto atribuido");
+				System.out.println("Projeto inexistente ou concluido");			
 		}
 		else
 			System.out.println("Junior ou Senior inexistente");
@@ -85,32 +83,25 @@ public class FuncionarioController {
 	
 	@GetMapping(value="/visualizar-tarefa-especifica/{id_funcionario}/{id_projeto}/{id_tarefa}")
 	public Tarefa lerTarefaEspecifica(@PathVariable Long id_funcionario, @PathVariable Long id_projeto, @PathVariable Long id_tarefa) {
-		if( (funcionarioService.encontrarSenior(id_funcionario)) || (funcionarioService.encontrarJunior(id_funcionario)) ) {
-			this.funcionario = funcionarioRepository.findById(id_funcionario).get();
-			if(this.funcionario.getProjeto()!=null) {
-				this.projeto = projetoRepository.findById(id_projeto).get();
-				if(this.projeto!=null && this.projeto.isStatus()==true) {
-					if(funcionarioService.encontrarTarefa(id_tarefa)) {
+		if ((funcionarioService.encontrarSenior(id_funcionario)) || (funcionarioService.encontrarJunior(id_funcionario))) {
+			if (funcionarioService.verificarExisteProjeto(id_projeto)) {
+				if (funcionarioService.verificarFuncionarioProjeto(id_funcionario, id_projeto)) {
+					if (funcionarioService.encontrarTarefa(id_tarefa)) {
+						this.projeto = projetoRepository.findById(id_projeto).get();
 						this.tarefa = tarefaRepository.findById(id_tarefa).get();
-						if(this.tarefa.getProjeto()==this.projeto) {
+						if (this.tarefa.getProjeto() == this.projeto) {
 							return this.tarefa;
-						}
-						else {
+						} else {
 							System.out.println("Esta tarefa não faz parte deste projeto");
 						}
-					}
-					else {
+					} else {
 						System.out.println("Tarefa inexistente");
 					}
-				}
-				else {
-					System.out.println("Projeto inexistente ou concluido");
-				}
-			}
-			else
-				System.out.println("Este funcionario não tem projeto atribuido");				
-		}
-		else {
+				} else
+					System.out.println("Este funcionario não foi atribuido a este projeto");
+			} else
+				System.out.println("Projeto inexistente ou concluido");
+		} else {
 			System.out.println("Junior ou Senior inexistente");
 		}
 		return null;
@@ -215,7 +206,7 @@ public class FuncionarioController {
 	public Tarefa criarTarefa(@RequestBody Tarefa tarefa, @PathVariable Long id_projeto,  @PathVariable Long id_funcionario_senior) {
 		if(funcionarioService.encontrarSenior(id_funcionario_senior)) {
 			if(funcionarioService.verificarExisteProjeto(id_projeto)) {
-				if(funcionarioService.verificarSeniorProjeto(id_funcionario_senior, id_projeto)) {
+				if(funcionarioService.verificarFuncionarioProjeto(id_funcionario_senior, id_projeto)) {
 					System.out.println("Tarefa criada com sucesso");
 					this.projeto = projetoRepository.findById(id_projeto).get();
 					tarefa.setProjeto(this.projeto);
@@ -227,7 +218,7 @@ public class FuncionarioController {
 				}
 			}
 			else {
-				System.out.println("Projeto inexistente");
+				System.out.println("Projeto inexistente ou concluido");
 			}
 		}
 		else {
@@ -304,7 +295,7 @@ public class FuncionarioController {
 		this.projeto = projetoRepository.findById(id_projeto).get();
 		if(funcionarioService.encontrarSenior(id_funcionario_senior)) {
 			if(funcionarioService.verificarExisteProjeto(id_projeto) && this.projeto.isStatus()==true) {
-				if(funcionarioService.verificarSeniorProjeto(id_funcionario_senior, id_projeto)) {
+				if(funcionarioService.verificarFuncionarioProjeto(id_funcionario_senior, id_projeto)) {
 					if((funcionarioService.encontrarSenior(id_funcionario_junior_senior)) || (funcionarioService.encontrarJunior(id_funcionario_junior_senior))) {
 						if(funcionarioService.verificarFuncionarioSemProjeto(id_funcionario_junior_senior)) {
 							if (funcionarioService.verificarQuantidadeFuncionariosProjeto(id_projeto)) {
@@ -441,9 +432,9 @@ public class FuncionarioController {
 	// deixar null em senior e junior e false status
 	@PutMapping(value = "/finalizar-projeto/{id_funcionario}/{id_projeto}") // Somente senior
 	public Projeto finalizarProjeto(@PathVariable Long id_funcionario, @PathVariable Long id_projeto) {
-		this.projeto = projetoRepository.findById(id_projeto).get();
 		if(funcionarioService.encontrarSenior(id_funcionario)) {
-			if( (funcionarioService.verificarExisteProjeto(id_projeto)) && (this.projeto.isStatus()==true)) {
+			if(funcionarioService.verificarExisteProjeto(id_projeto)) {
+				this.projeto = projetoRepository.findById(id_projeto).get();
 				if(funcionarioService.verificarTodasTarefasConcluidas(this.projeto)) {
 					this.projeto.setStatus(false);
 					this.projeto.setData_conclusao(data);
@@ -468,9 +459,9 @@ public class FuncionarioController {
 	// deixar null em senior e junior e false status
 	@PutMapping(value = "/deletar-projeto/{id_funcionario}/{id_projeto}") // Somente administrador
 	public void deletarProjeto(@PathVariable Long id_projeto, @PathVariable Long id_funcionario) {
-		this.projeto = projetoRepository.findById(id_projeto).get();
 		if (funcionarioService.encontrarAdministrador(id_funcionario)) {
-			if ((funcionarioService.verificarExisteProjeto(id_projeto)) && (this.projeto.isStatus() == true)) {
+			if (funcionarioService.verificarExisteProjeto(id_projeto)) {
+				this.projeto = projetoRepository.findById(id_projeto).get();
 				funcionarioService.finalizarProjetoFuncionarios(this.projeto);
 				this.projeto.setStatus(false);
 				projetoRepository.save(this.projeto);
@@ -482,9 +473,8 @@ public class FuncionarioController {
 	
 	@PutMapping(value = "/atualizar-projeto/{id_funcionario}/{id_projeto}") // Somente senior
 	public Projeto atualizarProjeto(@RequestBody Projeto projeto, @PathVariable Long id_projeto, @PathVariable Long id_funcionario) {
-		this.projeto = projetoRepository.findById(id_projeto).get();
-		if( (funcionarioService.encontrarSenior(id_funcionario))) {
-			if(funcionarioService.verificarExisteProjeto(id_projeto) && (this.projeto.isStatus() == true)) {
+		if(funcionarioService.encontrarSenior(id_funcionario)) {
+			if(funcionarioService.verificarExisteProjeto(id_projeto)) {
 				if(funcionarioService.verificarSomenteMudancaNomeDescricao(projeto, id_projeto)) {
 					projetoRepository.save(projeto);
 					return projeto;
@@ -507,7 +497,7 @@ public class FuncionarioController {
 	public void demitirFuncionario(@PathVariable Long id_funcionario, @PathVariable Long id_funcionario_demitido) {
 		if(funcionarioService.encontrarAdministrador(id_funcionario)) {
 			if(funcionarioService.encontrarFuncionario(id_funcionario_demitido)!=null) {
-				if (funcionarioService.verificarFuncionarioProjetoDemicao(id_funcionario_demitido)) {
+				if (funcionarioService.verificarFuncionarioSemProjeto(id_funcionario_demitido)) {
 					this.funcionario = funcionarioRepository.findById(id_funcionario_demitido).get();
 					
 					this.funcionario.setStatus(false);
