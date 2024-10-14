@@ -19,7 +19,7 @@ public class FuncionarioProjeto {
 	private Long id_funcionario_projeto;
 	
 	private LocalDate  data_participacao_inicial;
-	private LocalDate  data_participacao_final;
+	private LocalDate  data_participacao_final = null;
 	
 	@ManyToOne
 	@JoinColumn(name="projeto_id")

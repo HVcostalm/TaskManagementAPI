@@ -20,21 +20,20 @@ public class Funcionario {
 	private String login_funcionario;
 	private String email;
 	private String senha;
-	private boolean status;
+	private boolean status = true;
 	
 	@Enumerated(EnumType.ORDINAL)
 	private NivelPermissao nivel_permissao;
 	
 	@ManyToOne
 	@JoinColumn(name="projeto_id")
-	private Projeto projeto;
+	private Projeto projeto = null;
 	
-	public Funcionario(Long id_funcionario, String login_funcionario, String email, String senha, boolean status, NivelPermissao nivel_permissao) {
+	public Funcionario(Long id_funcionario, String login_funcionario, String email, String senha, NivelPermissao nivel_permissao) {
 		this.id_funcionario = id_funcionario;
 		this.login_funcionario = login_funcionario;
 		this.email = email;
 		this.senha = senha;
-		this.status = status;
 		this.nivel_permissao = nivel_permissao;
 	}
 	

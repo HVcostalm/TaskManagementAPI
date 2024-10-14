@@ -38,7 +38,6 @@ public class FuncionarioService {
 	private Funcionario funcionario;
 	private Projeto projeto;
 	private Tarefa tarefa;
-	private NivelPermissao nivel_permissao;
 	private Status status;
 	private LocalDate data = LocalDate.now();
 	
@@ -56,6 +55,7 @@ public class FuncionarioService {
 		existeFuncionarioSenior = this.encontrarSenior(id_funcionario);
 		
 		if(existeFuncionarioSenior) {
+			this.funcionario = funcionario_repository.findById(id_funcionario).get();
 			if(this.funcionario.getProjeto()==null) {
 				return true;
 			}

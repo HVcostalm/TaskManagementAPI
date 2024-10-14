@@ -253,7 +253,6 @@ public class FuncionarioController {
 				FuncionarioProjeto funcionarioProjetoNovo = new FuncionarioProjeto();
 				
 				funcionarioProjetoNovo.setData_participacao_inicial(data);
-				funcionarioProjetoNovo.setData_participacao_final(null);
 				funcionarioProjetoNovo.setFuncionario(this.funcionario);
 				funcionarioProjetoNovo.setProjeto(projeto);
 
@@ -306,7 +305,6 @@ public class FuncionarioController {
 								FuncionarioProjeto funcionarioProjetoNovo = new FuncionarioProjeto();
 								
 								funcionarioProjetoNovo.setData_participacao_inicial(data);
-								funcionarioProjetoNovo.setData_participacao_final(null);
 								funcionarioProjetoNovo.setFuncionario(this.funcionario);
 								funcionarioProjetoNovo.setProjeto(this.projeto);
 

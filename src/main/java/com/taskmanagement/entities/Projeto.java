@@ -17,14 +17,13 @@ public class Projeto {
 	private String nome_projeto;
 	private String descricao_projeto;
 	private LocalDate  data_prevista_entrega;
-	private LocalDate  data_conclusao;
-	private boolean status;
+	private LocalDate  data_conclusao = null;
+	private boolean status=true;
 	
-	public Projeto(String nome_projeto, String descricao_projeto, LocalDate  data_prevista_entrega, boolean status) {
+	public Projeto(String nome_projeto, String descricao_projeto, LocalDate  data_prevista_entrega) {
 		this.nome_projeto = nome_projeto;
 		this.descricao_projeto = descricao_projeto;
 		this.data_prevista_entrega = data_prevista_entrega;
-		this.status = status;
 	}
 	
 	public Projeto() {
